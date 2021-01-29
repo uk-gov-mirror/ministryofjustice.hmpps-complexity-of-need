@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  title: Complexity Level Microservice
+  description: Complexity Level Microservice Description.
+  version: 0.1-oas3
+  contact:
+    name: Manage POM Cases team
+    email: elephants@digital.justice.gov.uk
+tags:
+  - name: SingleIndividualComplexityLevel
+    description: Access to Complexity Level for an Individual
+  - name: MultipleComplexityLevels
+    description: Access to Complexity Levels for multiple Individuals
+paths:
+  /ComplexityLevel/{offenderNo}:
+    get:
+      tags:
+        - SingleIndividualComplexityLevel
+      summary: Retrieve Complexity Level for the given NOMIS Offender Number
+      description: >-
+        Returns a single Complexity Level value for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
+        found' if the identifier is "invalid"
+      operationId: getCLForSingleOffenderNumber
+      parameters:
+        - name: offenderNo
+          in: path
+          description: NOMIS Assigned Offender Number (Prisoner Identifier)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplexityLevel'
+        '404':
+          description: NOMIS Offender Number not found
+      security:
+        - CL_auth:
+            - 'write:CL'
+            - 'read:CL'
+    post:
+      tags:
+        - SingleIndividualComplexityLevel
+      summary: >-
+        Store a new Complexity Level value for the given NOMIS Offender Number
+      description: ''
+      operationId: storeCLForOffenderNumber
+      parameters:
+        - name: offenderNo
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplexityLevel'
+        description: Complexity Level object to be added to the repository
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplexityLevel'
+        '405':
+          description: Invalid input
+      security:
+        - CL_auth:
+            - 'write:CL'
+  /ComplexityLevelHistory/{offenderNo}:
+    get:
+      tags:
+        - SingleIndividualComplexityLevel
+      summary: Retrieve full history of Complexity Levels for the given NOMIS Offender Number
+      description: >-
+        Returns history of Complexity Level values for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
+        found' if the identifier is "invalid"
+      operationId: getCLHistoryForSingleOffenderNumber
+      parameters:
+        - name: offenderNo
+          in: path
+          description: NOMIS Assigned Offender Number (Prisoner Identifier)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComplexityLevel'
+        '404':
+          description: NOMIS Offender Number not found
+      security:
+        - CL_auth:
+            - 'write:CL'
+            - 'read:CL'
+  /multipleComplexityLevels:
+    post:
+      tags:
+        - MultipleComplexityLevels
+      summary: >-
+        Retrieve Complexity Levels for the given set of NOMIS Offender Numbers
+      description: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+        description: List Of NOMIS Offender Numbers
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComplexityLevel'
+        '405':
+          description: Invalid input
+      security:
+        - CL_auth:
+            - 'read:CL'
+externalDocs:
+  description: Find out more about OMIC and Complexity Levels
+  url: >-
+    https://intranet.noms.gsi.gov.uk/policies-and-subjects/policy-frameworks/manage-the-custodial-sentence
+servers:
+  - url: https://api.{environment}.complexitylevel.hmpps.digital.justice.gov.uk
+    variables:
+      environment:
+        default: prod # Production server
+        enum:
+          - prod      # Production server
+          - pre-prod  # Pre-production server
+          - dev       # Development server
+          - staging   # Staging server
+components:
+  securitySchemes:
+    CL_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://hmpps_oauth_service.com'
+          scopes:
+            'write:CL': write CL entries
+            'read:CL': read CL entries
+  schemas:
+    ComplexityLevel:
+      type: object
+      properties:
+        offenderNo:
+          type: string
+          description: NOMIS Offender Number
+        complexityLevel:
+          $ref: '#/components/schemas/Level'
+        createdTimeStamp:
+          type: string
+          format: date-time
+          description: The date & time this complexity level entry was created
+        sourceSystem:
+          type: string
+          description: The source system for this complexity level entry
+        sourceUser:
+          type: string
+          description: The user who supplied this complexity value (for manual entry)
+    Level:
+      type: string
+      description: complexity level
+      enum:
+        - low
+        - medium
+        - high

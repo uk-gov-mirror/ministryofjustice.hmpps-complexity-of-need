@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Complexity Level Microservice
+  title: Complexity Level Microservice Title
   description: Complexity Level Microservice Description.
   version: 0.1-oas3
   contact:

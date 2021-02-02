@@ -43,7 +43,7 @@ paths:
         - CL_auth:
             - 'write:CL'
             - 'read:CL'
-
+     
   /ComplexityLevel/{offenderNo}:
     get:
       tags:

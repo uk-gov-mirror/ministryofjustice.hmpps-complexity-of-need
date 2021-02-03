@@ -1,53 +1,21 @@
 openapi: 3.0.0
 info:
-  title: Complexity Level Microservice Title
+  title: Complexity Level Microservice
   description: Complexity Level Microservice Description.
-  version: 0.1-oas3
+  version: v1.0
   contact:
     name: Manage POM Cases team
     email: elephants@digital.justice.gov.uk
 tags:
-  - name: ComplexityLevelObject
-    description: Access to Complexity Level Object
-  - name: SingleIndividualComplexityLevel
+  - name: Single Individual Complexity Level
     description: Access to Complexity Level for an Individual
-  - name: MultipleComplexityLevels
+  - name: Multiple Individuals Complexity Level
     description: Access to Complexity Levels for multiple Individuals
 paths:
-  /ComplexityLevelObject/{objectID}:
+  /complexity-level/offender-no/{offenderNo}:
     get:
       tags:
-        - ComplexityLevelObject
-      summary: Retrieve Complexity Level Object by ObjectID
-      description: >-
-        Returns a single Complexity Level object for the given ID. This call does not check the validity of the ID - it will simply respond with 'not
-        found' if the ID is 'invalid'
-      operationId: getCLObjectForID
-      parameters:
-        - name: objectID
-          in: path
-          description: object identifier for required Complexity Level object
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ComplexityLevel'
-        '404':
-          description: Object Identifier not found
-      security:
-        - CL_auth:
-            - 'write:CL'
-            - 'read:CL'
-     
-  /ComplexityLevel/{offenderNo}:
-    get:
-      tags:
-        - SingleIndividualComplexityLevel
+        - Single Individual Complexity Level
       summary: Retrieve Complexity Level for the given NOMIS Offender Number
       description: >-
         Returns a single Complexity Level value for the given Offender Number. This call does not check the validity of the Offender Number - it will simply respond with 'not found' if the Offender Number is 'invalid'
@@ -67,14 +35,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ComplexityLevel'
         '404':
-          description: NOMIS Offender Number not found
+          $ref: '#/components/responses/404notfound'
       security:
         - CL_auth:
             - 'write:CL'
             - 'read:CL'
     post:
       tags:
-        - SingleIndividualComplexityLevel
+        - Single Individual Complexity Level
       summary: >-
         Store a new Complexity Level value for the given NOMIS Offender Number
       description: ''
@@ -90,7 +58,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ComplexityLevel'
+              $ref: '#/components/schemas/NewComplexityLevelEntry'
         description: Complexity Level object to be added to the repository
         required: true
       responses:
@@ -105,10 +73,10 @@ paths:
       security:
         - CL_auth:
             - 'write:CL'
-  /ComplexityLevelHistory/{offenderNo}:
+  /complexity-level/offender-no/{offenderNo}/history:
     get:
       tags:
-        - SingleIndividualComplexityLevel
+        - Single Individual Complexity Level
       summary: Retrieve full history of Complexity Levels for the given NOMIS Offender Number
       description: >-
         Returns history of Complexity Level values for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
@@ -131,15 +99,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/ComplexityLevel'
         '404':
-          description: NOMIS Offender Number not found
+          $ref: '#/components/responses/404notfound'
       security:
         - CL_auth:
             - 'write:CL'
             - 'read:CL'
-  /multipleComplexityLevels:
+  /complexity-level/multiple/offender-no:
     post:
       tags:
-        - MultipleComplexityLevels
+        - Multiple Individuals Complexity Level
       summary: >-
         Retrieve Complexity Levels for the given set of NOMIS Offender Numbers
       description: ''
@@ -166,20 +134,21 @@ paths:
       security:
         - CL_auth:
             - 'read:CL'
+############################################
 externalDocs:
   description: Find out more about OMIC and Complexity Levels
   url: >-
     https://intranet.noms.gsi.gov.uk/policies-and-subjects/policy-frameworks/manage-the-custodial-sentence
 servers:
-  - url: https://api.{environment}.complexitylevel.hmpps.digital.justice.gov.uk
+  - url: https://api.complexitylevel-{environment}.hmpps.digital.justice.gov.uk/v1
     variables:
       environment:
-        default: prod # Production server
+        default: prod # Production
         enum:
-          - prod      # Production server
-          - pre-prod  # Pre-production server
-          - dev       # Development server
-          - staging   # Staging server
+          - prod      # Production
+          - pre-prod  # Pre-production
+          - staging   # Staging
+          - dev       # Development
 components:
   securitySchemes:
     CL_auth:
@@ -191,6 +160,14 @@ components:
             'write:CL': write CL entries
             'read:CL': read CL entries
   schemas:
+    NewComplexityLevelEntry:
+      type: object
+      properties:
+        complexityLevel:
+          $ref: '#/components/schemas/Level'
+        sourceUser:
+          type: string
+          description: The user who supplied this complexity value (for manual entry)
     ComplexityLevel:
       type: object
       properties:
@@ -202,6 +179,9 @@ components:
           description: NOMIS Offender Number
         complexityLevel:
           $ref: '#/components/schemas/Level'
+        sourceUser:
+          type: string
+          description: The ID of the user who supplied this complexity value (for manual entry)
         createdTimeStamp:
           type: string
           format: date-time
@@ -209,9 +189,6 @@ components:
         sourceSystem:
           type: string
           description: The source system for this complexity level entry
-        sourceUser:
-          type: string
-          description: The user who supplied this complexity value (for manual entry)
     Level:
       type: string
       description: complexity level
@@ -219,3 +196,13 @@ components:
         - low
         - medium
         - high
+  responses:
+    '404notfound':
+      description:  No entry found for passed parameter
+      content:
+        text/plain:
+          schema:
+            type: object
+            properties:
+              errortext: # details of the error
+                type: string

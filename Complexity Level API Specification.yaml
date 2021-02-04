@@ -171,15 +171,12 @@ components:
     ComplexityLevel:
       type: object
       properties:
-        ID:
-          type: string
-          description: Object Identifier - a UUID
         offenderNo:
           type: string
           description: NOMIS Offender Number
         complexityLevel:
           $ref: '#/components/schemas/Level'
-        sourceUser:
+        sourceUserId:
           type: string
           description: The ID of the user who supplied this complexity value (for manual entry)
         createdTimeStamp:

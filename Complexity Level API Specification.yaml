@@ -171,7 +171,7 @@ components:
     ComplexityLevel:
       type: object
       properties:
-        objectID:
+        ID:
           type: string
           description: Object Identifier - a UUID
         offenderNo:

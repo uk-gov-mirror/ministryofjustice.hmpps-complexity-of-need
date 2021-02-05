@@ -176,16 +176,19 @@ components:
           description: NOMIS Offender Number
         complexityLevel:
           $ref: '#/components/schemas/Level'
-        sourceUserId:
+        sourceUser:
           type: string
-          description: The ID of the user who supplied this complexity value (for manual entry)
+          description: The user who supplied this complexity value (for manual entry)
+        sourceSystem:
+          type: string
+          description: The source system for this complexity level entry
+        notes:
+          type: string
+          description: Free-text notes for this entry
         createdTimeStamp:
           type: string
           format: date-time
           description: The date & time this complexity level entry was created
-        sourceSystem:
-          type: string
-          description: The source system for this complexity level entry
     Level:
       type: string
       description: complexity level

@@ -165,6 +165,9 @@ components:
       properties:
         complexityLevel:
           $ref: '#/components/schemas/Level'
+        notes:
+          type: string
+          description: Free text notes about this entry
         sourceUser:
           type: string
           description: The user who supplied this complexity value (for manual entry)

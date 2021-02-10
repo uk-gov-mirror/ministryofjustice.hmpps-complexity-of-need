@@ -44,7 +44,7 @@ paths:
       tags:
         - Single Individual Complexity of Need
       summary: >-
-        Store a new Complexity of Need value for the given NOMIS Offender Number
+        Store a new Complexity of Need entry for the given NOMIS Offender Number
       description: ''
       operationId: storeCLForOffenderNumber
       parameters:
@@ -79,7 +79,7 @@ paths:
         - Single Individual Complexity of Need
       summary: Retrieve full history of Complexity of Needs for the given NOMIS Offender Number
       description: >-
-        Returns history of Complexity of Need values for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
+        Returns history of Complexity of Need entries for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
         found' if the identifier is "invalid"
       operationId: getCLHistoryForSingleOffenderNumber
       parameters:
@@ -109,7 +109,7 @@ paths:
       tags:
         - Multiple Individuals Complexity of Need
       summary: >-
-        Retrieve Complexity of Needs for the given set of NOMIS Offender Numbers
+        Retrieve Complexity of Need entries for the given set of NOMIS Offender Numbers
       description: ''
       requestBody:
         content:
@@ -167,7 +167,7 @@ components:
           $ref: '#/components/schemas/Level'
         sourceUser:
           type: string
-          description: The user who supplied this complexity value (for manual entry)
+          description: The user who supplied this complexity entry (for manual entry)
         notes:
           type: string
           description: Free text notes about this entry

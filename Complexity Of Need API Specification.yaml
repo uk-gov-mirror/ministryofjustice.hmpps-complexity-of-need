@@ -1,24 +1,24 @@
 openapi: 3.0.0
 info:
-  title: Complexity Level Microservice
-  description: Complexity Level Microservice Description.
+  title: Complexity of Need Microservice
+  description: Complexity of Need Microservice Description.
   version: v1.0
   contact:
     name: Manage POM Cases team
     email: elephants@digital.justice.gov.uk
 tags:
-  - name: Single Individual Complexity Level
-    description: Access to Complexity Level for an Individual
-  - name: Multiple Individuals Complexity Level
-    description: Access to Complexity Levels for multiple Individuals
+  - name: Single Individual Complexity of Need
+    description: Access to Complexity of Need for an Individual
+  - name: Multiple Individuals Complexity of Need
+    description: Access to Complexity of Need for multiple Individuals
 paths:
-  /complexity-level/offender-no/{offenderNo}:
+  /complexity-of-need/offender-no/{offenderNo}:
     get:
       tags:
-        - Single Individual Complexity Level
-      summary: Retrieve Complexity Level for the given NOMIS Offender Number
+        - Single Individual Complexity of Need
+      summary: Retrieve Complexity of Need for the given NOMIS Offender Number
       description: >-
-        Returns a single Complexity Level value for the given Offender Number. This call does not check the validity of the Offender Number - it will simply respond with 'not found' if the Offender Number is 'invalid'
+        Returns a single Complexity of Need value for the given Offender Number. This call does not check the validity of the Offender Number - it will simply respond with 'not found' if the Offender Number is 'invalid'
       operationId: getCLForSingleOffenderNumber
       parameters:
         - name: offenderNo
@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComplexityLevel'
+                $ref: '#/components/schemas/ComplexityOfNeed'
         '404':
           $ref: '#/components/responses/404notfound'
       security:
@@ -42,9 +42,9 @@ paths:
             - 'read:CL'
     post:
       tags:
-        - Single Individual Complexity Level
+        - Single Individual Complexity of Need
       summary: >-
-        Store a new Complexity Level value for the given NOMIS Offender Number
+        Store a new Complexity of Need value for the given NOMIS Offender Number
       description: ''
       operationId: storeCLForOffenderNumber
       parameters:
@@ -58,8 +58,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewComplexityLevelEntry'
-        description: Complexity Level object to be added to the repository
+              $ref: '#/components/schemas/NewComplexityOfNeedEntry'
+        description: Complexity of Need object to be added to the repository
         required: true
       responses:
         '200':
@@ -67,19 +67,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComplexityLevel'
+                $ref: '#/components/schemas/ComplexityOfNeed'
         '405':
           description: Invalid input
       security:
         - CL_auth:
             - 'write:CL'
-  /complexity-level/offender-no/{offenderNo}/history:
+  /complexity-of-need/offender-no/{offenderNo}/history:
     get:
       tags:
-        - Single Individual Complexity Level
-      summary: Retrieve full history of Complexity Levels for the given NOMIS Offender Number
+        - Single Individual Complexity of Need
+      summary: Retrieve full history of Complexity of Needs for the given NOMIS Offender Number
       description: >-
-        Returns history of Complexity Level values for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
+        Returns history of Complexity of Need values for the given Offender Number. This call does not check the validity of the identifier - it will simply respond with 'not
         found' if the identifier is "invalid"
       operationId: getCLHistoryForSingleOffenderNumber
       parameters:
@@ -97,19 +97,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ComplexityLevel'
+                  $ref: '#/components/schemas/ComplexityOfNeed'
         '404':
           $ref: '#/components/responses/404notfound'
       security:
         - CL_auth:
             - 'write:CL'
             - 'read:CL'
-  /complexity-level/multiple/offender-no:
+  /complexity-of-need/multiple/offender-no:
     post:
       tags:
-        - Multiple Individuals Complexity Level
+        - Multiple Individuals Complexity of Need
       summary: >-
-        Retrieve Complexity Levels for the given set of NOMIS Offender Numbers
+        Retrieve Complexity of Needs for the given set of NOMIS Offender Numbers
       description: ''
       requestBody:
         content:
@@ -128,7 +128,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ComplexityLevel'
+                  $ref: '#/components/schemas/ComplexityOfNeed'
         '405':
           description: Invalid input
       security:
@@ -136,11 +136,11 @@ paths:
             - 'read:CL'
 ############################################
 externalDocs:
-  description: Find out more about OMIC and Complexity Levels
+  description: Find out more about OMIC and Complexity of Need
   url: >-
     https://intranet.noms.gsi.gov.uk/policies-and-subjects/policy-frameworks/manage-the-custodial-sentence
 servers:
-  - url: https://api.complexitylevel-{environment}.hmpps.digital.justice.gov.uk/v1
+  - url: https://api.ComplexityOfNeed-{environment}.hmpps.digital.justice.gov.uk/v1
     variables:
       environment:
         default: prod # Production
@@ -160,10 +160,10 @@ components:
             'write:CL': write CL entries
             'read:CL': read CL entries
   schemas:
-    NewComplexityLevelEntry:
+    NewComplexityOfNeedEntry:
       type: object
       properties:
-        complexityLevel:
+        ComplexityOfNeed:
           $ref: '#/components/schemas/Level'
         sourceUser:
           type: string
@@ -171,30 +171,30 @@ components:
         notes:
           type: string
           description: Free text notes about this entry
-    ComplexityLevel:
+    ComplexityOfNeed:
       type: object
       properties:
         offenderNo:
           type: string
           description: NOMIS Offender Number
-        complexityLevel:
+        ComplexityOfNeed:
           $ref: '#/components/schemas/Level'
         sourceUser:
           type: string
-          description: The user who supplied this complexity value (for manual entry)
+          description: The user who supplied this value (for manual entry)
         sourceSystem:
           type: string
-          description: The source system for this complexity level entry
+          description: The source system for this entry
         notes:
           type: string
           description: Free-text notes for this entry
         createdTimeStamp:
           type: string
           format: date-time
-          description: The date & time this complexity level entry was created
+          description: The date & time this entry was created
     Level:
       type: string
-      description: complexity level
+      description: Complexity of Need Level
       enum:
         - low
         - medium

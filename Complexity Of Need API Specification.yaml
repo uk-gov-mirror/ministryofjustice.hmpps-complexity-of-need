@@ -140,7 +140,7 @@ externalDocs:
   url: >-
     https://intranet.noms.gsi.gov.uk/policies-and-subjects/policy-frameworks/manage-the-custodial-sentence
 servers:
-  - url: https://api.ComplexityOfNeed-{environment}.hmpps.digital.justice.gov.uk/v1
+  - url: https://api.complexityofneed-{environment}.hmpps.digital.justice.gov.uk/v1
     variables:
       environment:
         default: prod # Production
@@ -163,7 +163,7 @@ components:
     NewComplexityOfNeedEntry:
       type: object
       properties:
-        ComplexityOfNeed:
+        level:
           $ref: '#/components/schemas/Level'
         sourceUser:
           type: string
@@ -177,7 +177,7 @@ components:
         offenderNo:
           type: string
           description: NOMIS Offender Number
-        ComplexityOfNeed:
+        level:
           $ref: '#/components/schemas/Level'
         sourceUser:
           type: string

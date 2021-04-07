@@ -30,7 +30,7 @@ RSpec.configure do |config|
 
           Read permissions are granted to any authorised client. No particular role is required.
 
-          Write permissions are granted to clients with the role `ROLE_COMPLEXITY_OF_NEED` and a `write` scope.
+          Write permissions are granted to clients with the role `ROLE_UPDATE_COMPLEXITY_OF_NEED`.
 
           ---
 

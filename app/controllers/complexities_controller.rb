@@ -7,10 +7,11 @@ class ComplexitiesController < ApplicationController
 
   # Require write permissions to create new records
   skip_before_action :authorise_read!,  only: [:create]
-  before_action      :authorise_write!, only: [:create]
+  before_action      :authorise_write!, only: [:create, :inactivate]
 
   def show
     @complexity = Complexity.order(created_at: :desc).find_by!(offender_no: params[:offender_no])
+    not_found unless @complexity.active?
   end
 
   def create
@@ -21,12 +22,18 @@ class ComplexitiesController < ApplicationController
   def multiple
     return missing_offender_numbers unless params["_json"].is_a? Array
 
-    @complexities = Complexity.latest_for_offenders(params["_json"])
+    @complexities = Complexity.active.latest_for_offenders(params["_json"])
   end
 
   def history
     @complexities = Complexity.where(offender_no: params[:offender_no]).order(created_at: :desc)
     not_found if @complexities.blank?
+  end
+
+  def inactivate
+    @complexity = Complexity.order(created_at: :desc).find_by!(offender_no: params[:offender_no])
+    @complexity.update(active: false)
+    render 'show'
   end
 
 private

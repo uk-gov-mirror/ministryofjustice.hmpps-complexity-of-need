@@ -50,7 +50,8 @@ RSpec.describe "Complexities", type: :request do
           .to eq json_object(offenderNo: complexity.offender_no,
                              level: complexity.level,
                              sourceSystem: complexity.source_system,
-                             createdTimeStamp: complexity.created_at)
+                             createdTimeStamp: complexity.created_at,
+                             active: complexity.active)
       end
     end
 
@@ -65,7 +66,8 @@ RSpec.describe "Complexities", type: :request do
                              offenderNo: complexity.offender_no,
                              level: complexity.level,
                              sourceSystem: complexity.source_system,
-                             createdTimeStamp: complexity.created_at)
+                             createdTimeStamp: complexity.created_at,
+                             active: complexity.active)
       end
     end
 
@@ -86,6 +88,9 @@ RSpec.describe "Complexities", type: :request do
       let(:complexity) { nil }
       let(:offender_no) { "ABC123" }
       let(:different_offender_no) { "XYZ456" }
+      let(:most_recent) { Complexity.where(offender_no: offender_no).order(created_at: :desc).first }
+      let(:most_recent_active_status) { true }
+
 
       before do
         # Populate database with multiple records for multiple offenders
@@ -94,17 +99,27 @@ RSpec.describe "Complexities", type: :request do
           create(:complexity, offender_no: different_offender_no, created_at: date, updated_at: date)
         end
 
+        most_recent.update(active: most_recent_active_status)
+
         get endpoint, headers: request_headers
       end
 
       it "returns the most recent one for the specified offender" do
-        most_recent = Complexity.where(offender_no: offender_no).order(created_at: :desc).first
-
         expect(response_json)
             .to eq json_object(level: most_recent.level,
                                offenderNo: offender_no,
                                createdTimeStamp: most_recent.created_at,
-                               sourceSystem: most_recent.source_system)
+                               sourceSystem: most_recent.source_system,
+                               active: most_recent.active)
+      end
+
+      context 'and with the latest complexity inactive' do
+        let(:most_recent_active_status) { false }
+        let(:most_recent_active) { Complexity.active.where(offender_no: offender_no).order(created_at: :desc).first }
+
+        it "returns 404" do
+          expect(response).to have_http_status :not_found
+        end
       end
     end
 
@@ -160,7 +175,8 @@ RSpec.describe "Complexities", type: :request do
           .to eq json_object(offenderNo: offender_no,
                              level: post_body.fetch(:level),
                              sourceSystem: source_system,
-                             createdTimeStamp: complexity.created_at)
+                             createdTimeStamp: complexity.created_at,
+                             active: complexity.active)
       end
     end
 
@@ -186,7 +202,8 @@ RSpec.describe "Complexities", type: :request do
                              offenderNo: offender_no,
                              level: post_body.fetch(:level),
                              sourceSystem: source_system,
-                             createdTimeStamp: complexity.created_at)
+                             createdTimeStamp: complexity.created_at,
+                             active: complexity.active)
       end
     end
 
@@ -310,6 +327,7 @@ RSpec.describe "Complexities", type: :request do
             sourceUser: most_recent.source_user,
             notes: most_recent.notes,
             createdTimeStamp: most_recent.created_at,
+            active: most_recent.active
           }.compact # Remove nil values – sourceUser and notes are optional
         end
       end
@@ -346,6 +364,7 @@ RSpec.describe "Complexities", type: :request do
             level: most_recent.level,
             sourceSystem: most_recent.source_system,
             createdTimeStamp: most_recent.created_at,
+            active: most_recent.active
           }
         end
       end
@@ -382,6 +401,8 @@ RSpec.describe "Complexities", type: :request do
     end
 
     context "when the client's token has expired" do
+      let(:token_is_expired) { true }
+
       before do
         # Travel into the future to expire the access token
         Timecop.travel(Time.zone.today + 1.year) do
@@ -426,17 +447,20 @@ RSpec.describe "Complexities", type: :request do
         expect(response_json.first).to eq json_object(level: complexity.level,
                                                       offenderNo: complexity.offender_no,
                                                       createdTimeStamp: complexity.created_at,
-                                                      sourceSystem: complexity.source_system)
+                                                      sourceSystem: complexity.source_system,
+                                                      active: complexity.active)
       end
     end
 
     context "with multiple entries" do
       let(:offender_no) { "1234567" }
+      let(:history) { Complexity.order(created_at: :desc).where(offender_no: offender_no) }
+      let(:some_inactive) { false }
 
       before do
         # Populate database with multiple records for multiple offenders
-        [1.month.ago, 3.weeks.ago, 1.week.ago, 1.day.ago].each do |date|
-          create(:complexity, created_at: date, updated_at: date)
+        [1.month.ago, 3.weeks.ago, 1.week.ago, 1.day.ago].each_with_index do |date, i|
+          create(:complexity, offender_no: offender_no, created_at: date, updated_at: date, active: some_inactive ? i.odd? : true)
           create(:complexity, offender_no: different_offender_no, created_at: date, updated_at: date)
         end
 
@@ -449,13 +473,26 @@ RSpec.describe "Complexities", type: :request do
       end
 
       it "displays all the records for the offender in descending order" do
-        history = Complexity.order(created_at: :desc).where(offender_no: offender_no)
-
         response_json.each_with_index do |json, index|
           expect(json).to eq json_object(level: history[index].level,
                                          offenderNo: history[index].offender_no,
                                          createdTimeStamp: history[index].created_at,
-                                         sourceSystem: history[index].source_system)
+                                         sourceSystem: history[index].source_system,
+                                         active: history[index].active)
+        end
+      end
+
+      context 'with some inactivated' do
+        let(:some_inactive) { true }
+
+        it "displays all the records including inactivated" do
+          response_json.each_with_index do |json, index|
+            expect(json).to eq json_object(level: history[index].level,
+                                          offenderNo: history[index].offender_no,
+                                          createdTimeStamp: history[index].created_at,
+                                          sourceSystem: history[index].source_system,
+                                          active: history[index].active)
+          end
         end
       end
     end
@@ -488,6 +525,60 @@ RSpec.describe "Complexities", type: :request do
         # Travel into the future to expire the access token
         Timecop.travel(Time.zone.today + 1.year) do
           get endpoint, headers: request_headers
+        end
+      end
+
+      include_examples "HTTP 401 Unauthorized"
+    end
+
+  end
+
+  describe "PUT /v1/complexity-of-need/offender-no/:offender_no/inactivate" do
+    let(:endpoint) { "/v1/complexity-of-need/offender-no/#{offender_no}/inactivate" }
+    let(:offender_no) { complexity.offender_no }
+    let!(:complexity) { create(:complexity) }
+
+    context "when authenticated with correct role" do
+      before do
+        put endpoint, headers: request_headers
+      end
+
+      it "inactivates the latest record" do
+        expect(response).to have_http_status :ok
+        complexity = Complexity.find_by!(offender_no: offender_no)
+        expect(response_json)
+          .to eq json_object(offenderNo: offender_no,
+                             level: complexity.level,
+                             sourceSystem: complexity.source_system,
+                             createdTimeStamp: complexity.created_at,
+                             active: complexity.active)
+        expect(complexity.active).to eq(false)
+      end
+    end
+
+    context "without role ROLE_UPDATE_COMPLEXITY_OF_NEED" do
+      before do
+        stub_access_token scopes: %w[read write], roles: %w[ROLE_COMPLEXITY_OF_NEED]
+        put endpoint, headers: request_headers
+      end
+
+      include_examples "HTTP 403 Forbidden",
+                       "You need the role 'ROLE_UPDATE_COMPLEXITY_OF_NEED' to use this endpoint"
+    end
+
+    context "when the client is unauthenticated" do
+      before do
+        put endpoint # don't include an Authorization header
+      end
+
+      include_examples "HTTP 401 Unauthorized"
+    end
+
+    context "when the client's token has expired" do
+      before do
+        # Travel into the future to expire the access token
+        Timecop.travel(Time.zone.today + 1.year) do
+          put endpoint, headers: request_headers
         end
       end
 

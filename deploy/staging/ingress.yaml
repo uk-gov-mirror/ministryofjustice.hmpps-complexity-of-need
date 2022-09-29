@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hmpps-complexity-of-need
@@ -6,8 +6,8 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: hmpps-complexity-of-need-hmpps-complexity-of-need-staging-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
-    kubernetes.io/ingress.class: "nginx"
 spec:
+  ingressClassName: default
   tls:
   - hosts:
     - hmpps-complexity-of-need-staging.apps.live-1.cloud-platform.service.justice.gov.uk
@@ -19,13 +19,19 @@ spec:
     http:
       paths:
       - path: /
+        pathType: ImplementationSpecific
         backend:
-          serviceName: hmpps-complexity-of-need
-          servicePort: 3000
+          service:
+            name: hmpps-complexity-of-need
+            port:
+              number: 3000
   - host: complexity-of-need-staging.hmpps.service.justice.gov.uk
     http:
       paths:
       - path: /
+        pathType: ImplementationSpecific
         backend:
-          serviceName: hmpps-complexity-of-need
-          servicePort: 3000
+          service:
+            name: hmpps-complexity-of-need
+            port:
+              number: 3000

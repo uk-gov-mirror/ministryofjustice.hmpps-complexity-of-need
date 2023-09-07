@@ -10,6 +10,7 @@ spec:
   parallelism: 1
   template:
     spec:
+      serviceAccountName: hmpps-complexity-of-need
       containers:
         - name: hmpps-complexity-of-need-migration
           image: quay.io/hmpps/hmpps-complexity-of-need:latest

@@ -23,6 +23,7 @@ spec:
       labels:
         app: hmpps-complexity-of-need
     spec:
+      serviceAccountName: hmpps-complexity-of-need
       containers:
         - name: hmpps-complexity-of-need
           image: quay.io/hmpps/hmpps-complexity-of-need:latest

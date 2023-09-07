@@ -10,9 +10,10 @@ spec:
   parallelism: 1
   template:
     spec:
+      serviceAccountName: hmpps-complexity-of-need
       containers:
         - name: hmpps-complexity-of-need-migration
-          image: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/offender-management/hmpps-complexity-of-need:latest
+          image: quay.io/hmpps/hmpps-complexity-of-need:latest
           imagePullPolicy: Always
           command: ['sh', '-c', 'bundle exec rails db:migrate && bundle exec rails db:seed']
           envFrom:

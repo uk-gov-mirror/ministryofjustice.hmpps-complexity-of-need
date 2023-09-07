@@ -4,7 +4,7 @@ references:
 
   github_team_name_slug: &github_team_name_slug
     GITHUB_TEAM_NAME_SLUG: offender-management
-    ECR_ENDPOINT: 754256621582.dkr.ecr.eu-west-2.amazonaws.com
+    QUAYIO_REPO: quay.io/hmpps/hmpps-complexity-of-need
     REPONAME: hmpps-complexity-of-need
 
   deploy_container_config: &deploy_container_config
@@ -95,13 +95,14 @@ references:
     run:
       name: Push docker image
       command: |
-        login="$(aws ecr get-login --region eu-west-2 --no-include-email)"
-        ${login}
-        docker tag app "${ECR_ENDPOINT}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:${CIRCLE_SHA1}"
-        docker push "${ECR_ENDPOINT}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:${CIRCLE_SHA1}"
+        set -xeuo pipefail
+        docker login --username "${QUAYIO_USERNAME}" --password "${QUAYIO_PASSWORD}" quay.io
+        docker tag app "${QUAYIO_REPO}:${CIRCLE_SHA1}"
+        docker push "${QUAYIO_REPO}:${CIRCLE_SHA1}"
+
         if [ "${CIRCLE_BRANCH}" == "main" ]; then
-          docker tag app "${ECR_ENDPOINT}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:latest"
-          docker push "${ECR_ENDPOINT}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:latest"
+          docker tag app "${QUAYIO_REPO}:latest"
+          docker push "${QUAYIO_REPO}:latest"
         fi
       environment:
         <<: *github_team_name_slug

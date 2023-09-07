@@ -4,7 +4,7 @@ references:
 
   github_team_name_slug: &github_team_name_slug
     GITHUB_TEAM_NAME_SLUG: offender-management
-    QUAYIO_REPO: https://quay.io/repository/hmpps/hmpps-complexity-of-need
+    QUAYIO_REPO: quay.io/hmpps/hmpps-complexity-of-need
     REPONAME: hmpps-complexity-of-need
 
   deploy_container_config: &deploy_container_config
@@ -97,12 +97,12 @@ references:
       command: |
         set -xeuo pipefail
         docker login --username "${QUAYIO_USERNAME}" --password "${QUAYIO_PASSWORD}" quay.io
-        docker tag app "${QUAYIO_REPO}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:${CIRCLE_SHA1}"
-        docker push "${QUAYIO_REPO}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:${CIRCLE_SHA1}"
+        docker tag app "${QUAYIO_REPO}:${CIRCLE_SHA1}"
+        docker push "${QUAYIO_REPO}:${CIRCLE_SHA1}"
 
         if [ "${CIRCLE_BRANCH}" == "main" ]; then
-          docker tag app "${QUAYIO_REPO}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:latest"
-          docker push "${QUAYIO_REPO}/${GITHUB_TEAM_NAME_SLUG}/${REPONAME}:latest"
+          docker tag app "${QUAYIO_REPO}:latest"
+          docker push "${QUAYIO_REPO}:latest"
         fi
       environment:
         <<: *github_team_name_slug

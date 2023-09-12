@@ -19,7 +19,7 @@ gem "pg", "~> 1.1"
 gem "puma", "~> 5.6"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
-gem "rails", "6.1.5"
+gem "rails", "~> 6.1.5"
 gem "responders"
 gem "rswag-api"
 gem "rswag-ui"

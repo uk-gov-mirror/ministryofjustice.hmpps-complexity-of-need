@@ -1,26 +1,7 @@
 # frozen_string_literal: true
 
 require "rails_helper"
-
-shared_examples "HTTP 403 Forbidden" do |error_message|
-  it "returns HTTP 403 Forbidden" do
-    expect(response).to have_http_status :forbidden
-  end
-
-  it "includes validation errors in the response" do
-    expect(response_json).to eq json_object(message: error_message)
-  end
-end
-
-shared_examples "HTTP 401 Unauthorized" do
-  it "returns HTTP 401 Unauthorized" do
-    expect(response).to have_http_status :unauthorized
-  end
-
-  it "includes validation errors in the response" do
-    expect(response_json).to eq json_object(message: "Missing or invalid access token")
-  end
-end
+require "shared_examples"
 
 RSpec.describe "Complexities", type: :request do
   let(:response_json) { JSON.parse(response.body) }
@@ -589,14 +570,5 @@ RSpec.describe "Complexities", type: :request do
 
       include_examples "HTTP 401 Unauthorized"
     end
-  end
-
-private
-
-  # Run the supplied object through a JSON encode/decode cycle
-  # Useful when comparing non-string values against a JSON response
-  # e.g. date objects will be serialized and re-hydrated as strings
-  def json_object(object)
-    JSON.parse(object.to_json)
   end
 end

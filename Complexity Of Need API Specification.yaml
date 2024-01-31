@@ -1,5 +1,5 @@
 ---
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Complexity of Need API
   version: v1
@@ -24,6 +24,25 @@ security:
 - HmppsAuth:
   - read
 components:
+  responses:
+    ContentFound:
+      description: Request successfully processed - content found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/successResponse'
+    IncorrectRequest:
+      description: The request was not formed correctly
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    Unauthorised:
+      description: The client does not have authorisation to make this request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
   securitySchemes:
     HmppsAuth:
       type: oauth2
@@ -33,6 +52,27 @@ components:
           scopes:
             'write:CL': write CL entries
             'read:CL': read CL entries
+  parameters:
+    prisonReferenceNumber:
+      name: prn
+      description: NOMIS Prison Reference Number
+      in: query
+      schema:
+        type: string
+    fromDate:
+      name: fromDate
+      in: query
+      description: Optional parameter denoting minimum date of event occurrence which should be returned in the response
+      schema:
+        type: string
+        format: date
+    toDate:
+      name: toDate
+      in: query
+      description: Optional parameter denoting maximum date of event occurrence which should be returned in the response
+      schema:
+        type: string
+        format: date
   schemas:
     Level:
       type: string
@@ -93,6 +133,21 @@ components:
       required:
       - level
       additionalProperties: false
+    successResponse:
+      properties:
+        content:
+          type: object
+          additionalProperties: true
+    errorResponse:
+      properties:
+        developerMessage:
+          type: string
+        errorCode:
+          type: integer
+        status:
+          type: integer
+        userMessage:
+          type: string
 tags:
 - name: Single Offender
   description: Access Complexity of Need for a single offender
@@ -247,6 +302,32 @@ paths:
         '403':
           description: Access token is missing role `ROLE_COMPLEXITY_OF_NEED` or scope
             `write`
+  "/subject-access-request":
+    get:
+      summary: API call to retrieve SAR data from a product
+      tags:
+        - Subject Access Request
+      description: |
+        NOMIS Prison Number (PRN) must be provided as part of the request.
+        * If the product uses the identifier type transmitted in the request, it can respond with its data and HTTP code 200.
+        * If the product uses the identifier type transmitted in the request but has no data to respond with, it should respond with HTTP code 204
+        * If the product does not use the identifier type transmitted in the request, it should respond with HTTP code 209.
+
+      parameters:
+        - $ref: "#/components/parameters/prisonReferenceNumber"
+        - $ref: "#/components/parameters/fromDate"
+        - $ref: "#/components/parameters/toDate"
+      responses:
+        '200':
+          $ref: '#/components/responses/ContentFound'
+        '204':
+          description: Request successfully processed - no content found
+        '209':
+          description: Subject Identifier is not recognised by this service
+        '400':
+          $ref: '#/components/responses/IncorrectRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
 servers:
 - url: https://complexity-of-need-staging.hmpps.service.justice.gov.uk/v1
   description: Staging/dev environment
@@ -254,4 +335,3 @@ servers:
   description: Pre-production environment
 - url: https://complexity-of-need.hmpps.service.justice.gov.uk/v1
   description: Production environment
-

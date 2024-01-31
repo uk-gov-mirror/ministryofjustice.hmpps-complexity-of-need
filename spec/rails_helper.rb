@@ -75,3 +75,9 @@ Shoulda::Matchers.configure do |config|
   end
 end
 
+# Run the supplied object through a JSON encode/decode cycle
+# Useful when comparing non-string values against a JSON response
+# e.g. date objects will be serialized and re-hydrated as strings
+def json_object(object)
+  JSON.parse(object.to_json)
+end

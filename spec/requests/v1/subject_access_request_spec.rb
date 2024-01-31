@@ -16,7 +16,7 @@ RSpec.describe "Subject access request", type: :request do
     allow(ComplexityEventService).to receive(:sns_topic).and_return(topic)
   end
 
-  describe "GET /v1/subject-access-request" do
+  describe "GET /subject-access-request" do
     let(:endpoint) { "/subject-access-request" }
     let(:get_body) { {} }
 

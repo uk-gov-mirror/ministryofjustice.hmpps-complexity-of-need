@@ -17,7 +17,7 @@ RSpec.describe "Subject access request", type: :request do
   end
 
   describe "GET /v1/subject-access-request" do
-    let(:endpoint) { "/v1/subject-access-request" }
+    let(:endpoint) { "/subject-access-request" }
     let(:get_body) { {} }
 
     let(:time1) { Time.zone.now - 3.days }

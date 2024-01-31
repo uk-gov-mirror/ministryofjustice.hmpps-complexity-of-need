@@ -28,7 +28,7 @@ private
 
   def multiple_identifiers
     message = "Cannot supply both CRN and PRN"
-    render json: { developerMessage: message, errorCode: 1, status: 500, userMessage: message }, status: "500"
+    render json: { developerMessage: message, errorCode: 1, status: 400, userMessage: message }, status: "400"
   end
 
   def wrong_identifier

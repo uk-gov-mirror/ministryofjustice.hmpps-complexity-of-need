@@ -70,8 +70,8 @@ RSpec.describe "Subject access request", type: :request do
         }
       end
 
-      it "returns status 500" do
-        expect(response).to have_http_status "500"
+      it "returns status 400" do
+        expect(response).to have_http_status "400"
       end
 
       it_behaves_like "returns an error response"

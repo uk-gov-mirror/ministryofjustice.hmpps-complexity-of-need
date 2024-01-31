@@ -4,6 +4,8 @@ class SubjectAccessRequestController < ApplicationController
   respond_to :json
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
+  before_action :authorise_sar!
+
   def show
     return multiple_identifiers if params[:prn].present? && params[:crn].present?
     return wrong_identifier if params[:crn].present?

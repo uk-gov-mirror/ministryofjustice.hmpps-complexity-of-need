@@ -5,18 +5,13 @@ class ComplexitiesController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
   rescue_from ActiveRecord::RecordInvalid, with: :validation_error
 
-  # Require write permissions to create new records
-  skip_before_action :authorise_read!,  only: [:create]
-  before_action      :authorise_write!, only: %i[create inactivate]
+  before_action :authorise_read!,  only: %i[show multiple history]
+  before_action :authorise_write!, only: %i[create inactivate]
 
+  # Read operations
   def show
     @complexity = Complexity.order(created_at: :desc).find_by!(offender_no: params[:offender_no])
     not_found unless @complexity.active?
-  end
-
-  def create
-    @complexity = Complexity.create!(create_params)
-    render "show"
   end
 
   def multiple
@@ -28,6 +23,12 @@ class ComplexitiesController < ApplicationController
   def history
     @complexities = Complexity.where(offender_no: params[:offender_no]).order(created_at: :desc)
     not_found if @complexities.blank?
+  end
+
+  # Write operations
+  def create
+    @complexity = Complexity.create!(create_params)
+    render "show"
   end
 
   def inactivate

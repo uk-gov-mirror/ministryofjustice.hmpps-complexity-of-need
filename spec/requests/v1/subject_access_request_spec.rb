@@ -29,8 +29,11 @@ RSpec.describe "Subject access request", type: :request do
     let!(:complexity2) { create(:complexity, offender_no: offender_no, created_at: time2, active: false) }
     let!(:complexity3) { create(:complexity, offender_no: offender_no, created_at: time3, active: true) }
 
-    before do
-      get endpoint, headers: request_headers, params: get_body
+    shared_context "with mocked token" do
+      before do
+        stub_access_token scopes: %w[read write], roles: %w[ROLE_SAR_DATA_ACCESS]
+        get endpoint, headers: request_headers, params: get_body
+      end
     end
 
     shared_examples "returns expected complexities" do
@@ -58,6 +61,8 @@ RSpec.describe "Subject access request", type: :request do
     end
 
     context "when passed both a prn and crn as query parameters" do
+      include_context "with mocked token"
+
       let(:get_body) do
         {
           prn: "bobbins",
@@ -73,6 +78,8 @@ RSpec.describe "Subject access request", type: :request do
     end
 
     context "when passed a crn" do
+      include_context "with mocked token"
+
       let(:get_body) do
         { crn: "bobbins" }
       end
@@ -85,6 +92,8 @@ RSpec.describe "Subject access request", type: :request do
     end
 
     context "with no matching complexities" do
+      include_context "with mocked token"
+
       let(:get_body) do
         { prn: "bobbins" }
       end
@@ -99,6 +108,8 @@ RSpec.describe "Subject access request", type: :request do
     end
 
     context "with no to or from dates" do
+      include_context "with mocked token"
+
       let(:expected_complexities) { [complexity1, complexity2, complexity3] }
 
       let(:get_body) do
@@ -113,6 +124,8 @@ RSpec.describe "Subject access request", type: :request do
     end
 
     context "with to and from dates" do
+      include_context "with mocked token"
+
       let(:expected_complexities) { [complexity1, complexity2] }
 
       let(:get_body) do
@@ -130,16 +143,24 @@ RSpec.describe "Subject access request", type: :request do
       it_behaves_like "returns expected complexities"
     end
 
-    # TODO: This endpoint should be protected by role: ROLE_SAR-DATA-ACCESS and ROLE_???.
-    # Need some role that we already have access to as MPC
-
-    context "when the client doesn't have the 'read' scope" do
+    context "when the client lacks the ROLE_SAR_DATA_ACCESS role" do
       before do
-        stub_access_token scopes: []
+        stub_access_token scopes: %w[read write], roles: %w[ROLE_WHATEVER]
         get endpoint, headers: request_headers
       end
 
-      include_examples "HTTP 403 Forbidden", "You need the role 'ROLE_COMPLEXITY_OF_NEED' to use this endpoint"
+      include_examples "HTTP 403 Forbidden", "You need the role 'ROLE_SAR_DATA_ACCESS' to use this endpoint"
+
+      context "with the role ROLE_CNL_ADMIN" do # rubocop:disable RSpec/NestedGroups
+        before do
+          stub_access_token scopes: %w[read write], roles: %w[ROLE_CNL_ADMIN]
+          get endpoint, headers: request_headers, params: { prn: offender_no }
+        end
+
+        it "returns status OK" do
+          expect(response).to have_http_status :ok
+        end
+      end
     end
 
     context "when the client is unauthenticated" do

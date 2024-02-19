@@ -71,7 +71,7 @@ RSpec.describe "Subject access request", type: :request do
       end
 
       it "returns status 400" do
-        expect(response).to have_http_status "400"
+        expect(response).to have_http_status :bad_request
       end
 
       it_behaves_like "returns an error response"
@@ -85,7 +85,7 @@ RSpec.describe "Subject access request", type: :request do
       end
 
       it "returns status 209" do
-        expect(response).to have_http_status "209"
+        expect(response).to have_http_status "209" # rubocop:disable RSpec/Rails/HttpStatus
       end
 
       it_behaves_like "returns an error response"
@@ -99,7 +99,7 @@ RSpec.describe "Subject access request", type: :request do
       end
 
       it "returns 204" do
-        expect(response).to have_http_status "204"
+        expect(response).to have_http_status :no_content
       end
 
       it "returns blank body" do

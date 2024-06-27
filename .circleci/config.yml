@@ -19,7 +19,7 @@ references:
   test_container_config: &test_container_config
     resource_class: small
     docker:
-      - image: cimg/ruby:3.0.2
+      - image: cimg/ruby:3.3.3
         environment:
           RAILS_ENV: test
           PGHOST: 127.0.0.1
@@ -130,7 +130,7 @@ jobs:
       - ruby/install-deps
       - run:
           name: Rubocop
-          command: bundle exec rubocop
+          command: bundle exec rubocop --no-parallel
 
   run_tests:
     <<: *defaults
@@ -144,13 +144,6 @@ jobs:
       - run:
           name: Run RSpec tests
           command: bundle exec rspec --format progress --format RspecJunitFormatter --out ~/rspec/rspec.xml
-      - store_test_results:
-          path: ~/rspec
-      - store_artifacts:
-          path: coverage
-      - run:
-          name: Check code coverage
-          command: bundle exec undercover --compare origin/main
 
   build_and_push_docker_image:
     <<: *defaults

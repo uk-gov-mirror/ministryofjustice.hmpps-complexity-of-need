@@ -26,7 +26,9 @@ references:
           PGUSER: ubuntu
           RACK_ENV: test
           AWS_DEFAULT_REGION: eu-west-2
-          NOMIS_OAUTH_HOST: https://sign-in-dev.hmpps.service.justice.gov.uk
+          NOMIS_OAUTH_HOST: https://test-auth-service.example.com
+          NOMIS_OAUTH_CLIENT_ID: test-client-id
+          MOCK_AUTH: 1
       - image: circleci/postgres:10.5-alpine
         environment:
           POSTGRES_USER: ubuntu
@@ -139,16 +141,16 @@ jobs:
       - run:
           name: Security analysis
           command: bundle exec brakeman -o ~/test-results/brakeman/brakeman.json -o ~/test-results/brakeman/brakeman.html
-#      - run:
-#          name: Run RSpec tests
-#          command: bundle exec rspec --format progress --format RspecJunitFormatter --out ~/rspec/rspec.xml
-#      - store_test_results:
-#          path: ~/rspec
-#      - store_artifacts:
-#          path: coverage
-#      - run:
-#         name: Check code coverage
-#         command: bundle exec undercover --compare origin/main
+      - run:
+          name: Run RSpec tests
+          command: bundle exec rspec --format progress --format RspecJunitFormatter --out ~/rspec/rspec.xml
+      - store_test_results:
+          path: ~/rspec
+      - store_artifacts:
+          path: coverage
+      - run:
+          name: Check code coverage
+          command: bundle exec undercover --compare origin/main
 
   build_and_push_docker_image:
     <<: *defaults

@@ -1,0 +1,78 @@
+---
+# Default values.
+# Declare variables to be passed into your templates.
+#
+# Variables in `helm_deploy/values-[env].yaml` will take precedence.
+
+generic-service:
+  replicaCount: 2
+
+  nameOverride: hmpps-complexity-of-need
+  serviceAccountName: hmpps-complexity-of-need
+  productId: DPS030
+
+  containerCommand: ['sh', '-c', 'bundle exec puma']
+
+  image:
+    repository: quay.io/hmpps/hmpps-complexity-of-need
+    tag: app_version # overridden at deployment time
+    port: 3000
+
+  service:
+    port: 3000
+
+  ingress:
+    enabled: true
+
+  # https://github.com/ministryofjustice/hmpps-ip-allowlists/blob/main/ip-allowlist-groups.yaml
+  allowlist:
+    global-protect-3: "35.176.93.186/32"
+    groups:
+      - moj_cloud_platform
+
+  livenessProbe:
+    httpGet:
+      path: /health
+    periodSeconds: 60
+
+  readinessProbe:
+    httpGet:
+      path: /health
+    periodSeconds: 60
+
+  podSecurityContext:
+    fsGroup: 1001
+
+  securityContext:
+    runAsUser: 1001
+    runAsNonRoot: true
+
+  resources:
+    limits:
+      memory: 1000Mi
+      cpu: 1000m
+    requests:
+      memory: 500Mi
+      cpu: 50m
+
+  # Environment variables to load into the deployment
+  env:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: on
+    LD_PRELOAD: /usr/lib/x86_64-linux-gnu/libjemalloc.so
+
+  # Pre-existing kubernetes secrets to load as environment variables in the deployment.
+  # namespace_secrets:
+  #   [name of kubernetes secret]:
+  #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
+  namespace_secrets:
+    app-environment-secrets:
+      SECRET_KEY_BASE: SECRET_KEY_BASE
+      SENTRY_DSN: SENTRY_DSN
+    rds-instance-output:
+      POSTGRES_HOST: rds_instance_address
+      POSTGRES_USER: database_username
+      POSTGRES_PASSWORD: database_password
+      POSTGRES_NAME: database_name
+    hmpps-domain-events-topic:
+      DOMAIN_EVENTS_TOPIC_ARN: topic_arn

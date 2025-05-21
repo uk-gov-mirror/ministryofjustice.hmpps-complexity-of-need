@@ -20,7 +20,7 @@ generic-service:
   containerCommand: ['sh', '-c', 'bundle exec puma']
 
   image:
-    repository: quay.io/hmpps/hmpps-complexity-of-need
+    repository: ghcr.io/ministryofjustice/hmpps-complexity-of-need
     tag: app_version # overridden at deployment time
     port: 3000
 

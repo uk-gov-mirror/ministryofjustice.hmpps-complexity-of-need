@@ -1,4 +1,4 @@
-FROM ruby:3.4.1-slim-bullseye
+FROM ruby:3.4.5-slim-bullseye
 
 RUN \
   set -ex \
@@ -35,6 +35,7 @@ RUN \
     curl \
     build-essential \
     libpq-dev \
+    libyaml-dev \
     libjemalloc-dev \
   && timedatectl set-timezone Europe/London || true \
   && gem update bundler --no-document \
